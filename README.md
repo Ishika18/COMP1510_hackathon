@@ -9,4 +9,4 @@ Github ID: ronliang6
 
 ## Ryan Leung - A01204521
 
-## Terry Lun - A00855225
+[## Terry Lun - A00855225](https://github.com/TerryLun)
