@@ -39,11 +39,16 @@ def print_top_five_stores(stores):
     pass
 
 
+def get_distance(key, stores) -> list:
+    pass
+
+
 def run():
     key = get_api_key()
     current_latitude, current_longitude = get_current_location()
     stores = find_closest_stores(current_latitude, current_longitude)
-    stores = get_populartimes(key, stores)
+    stores = get_populartimes(key, stores)  # ['popular_times'] ['wait_times']
+    stores = get_distance(key, stores)  # ['distance']
     rank_stores(stores)
     print_top_five_stores(stores)
     html_file_name = generate_map(stores)
