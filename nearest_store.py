@@ -30,7 +30,7 @@ def get_current_location() -> tuple:
 
 def get_coordinate_data(postal_code: str) -> dict:
     """
-    Request coordinate data from Geolocation API based on user's input postal code.
+    Request coordinate data based on user's input postal code.
 
     :param postal_code: a string
     :return: response data as a dictionary
@@ -141,8 +141,41 @@ def get_api_key() -> str:
     return 'AIzaSyAVHKBzu0YpNi3o6Y_nYSY_wzNoDTN51mQ'
 
 
-def generate_map(stores) -> str:
-    pass
+def generate_map(stores, lat, lon) -> str:
+    # name of the html file
+    html_file_name = 'local_map.html'
+    icon_size = (50, 35)
+    initial_zoom_level = 12
+
+    # initialize map
+    local_map = folium.Map(location=[lat, lon], zoom_start=initial_zoom_level)
+
+    # add marker for current location
+    folium.CircleMarker(location=(lat, lon), radius=9, tooltip='Current location',
+                        color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
+
+    # parse data
+    data = pandas.read_csv('stores.csv')
+    store_name = list(data['NAME'])
+    store_latitude = list(data['LAT'])
+    store_longitude = list(data['LON'])
+    wait_time = list(data['WAIT'])
+    travel_time = list(data['TRAVEL'])
+
+    # add each store as marker
+    for i, (name, lat, lon, travel, wait) in enumerate(zip(store_name, store_latitude, store_longitude, travel_time,
+                                                           wait_time), 1):
+        html_content = """<h1>%s</h1>
+        <p>Estimated travel time: %s</p>
+        <p>Current wait time: %s</p>
+        """
+        folium.Marker([lat, lon], popup=html_content % (name, travel, wait), tooltip='Click for more info.',
+                      icon=folium.features.CustomIcon(f'{i}.png', icon_size=icon_size)).add_to(local_map)
+
+    # generate html file
+    local_map.save(html_file_name)
+
+    return html_file_name
 
 
 def print_top_five_stores(stores):
@@ -183,7 +216,7 @@ def run():
     stores = get_distance(stores, (current_latitude, current_longitude))  # ['distance']
     top_five_stores = rank_stores(stores)
     print_top_five_stores(top_five_stores)
-    html_file_name = generate_map(top_five_stores)
+    html_file_name = generate_map(top_five_stores, current_latitude, current_longitude)
     webbrowser.open(html_file_name)
 
 
