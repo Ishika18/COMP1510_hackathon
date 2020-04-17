@@ -10,7 +10,11 @@ import re
 
 
 def get_current_location() -> tuple:
-    """ user should enter postal code for regex"""
+    """
+    Return the latitude and longitude of the user.
+
+    :return: the latitude as a float and longitude as a float in a tuple
+    """
     postal_code = prompt_postal_code()
 
     key = get_api_key()
@@ -25,6 +29,12 @@ def get_current_location() -> tuple:
 
 
 def get_coordinate_data(postal_code: str) -> dict:
+    """
+    Request coordinate data based on user's input postal code.
+
+    :param postal_code: a string
+    :return: response data as a dictionary
+    """
     key = get_api_key()
     response = requests.get(f'https://maps.googleapis.com/maps/api/geocode/json?address='
                             f'{postal_code}&key={key}')
@@ -37,13 +47,30 @@ def get_coordinate_data(postal_code: str) -> dict:
 
 
 def prompt_postal_code() -> str:
+    """
+    Prompt the user to enter a postal code.
+
+    :return: a validated postal code as a string
+    """
     postal_code = input('Enter a Canadian postal code in the format \'A1A 1A1\': ')
-    # REGEX USED HERE
-    pattern = re.compile(r'^[A-Z]\d[A-Z] ?\d[A-Z]\d$')
-    if pattern.search(postal_code):
+    if validate_postal_code(postal_code):
         return postal_code
     else:
         raise ValueError("Please enter a valid Canadian postal code.")
+
+
+def validate_postal_code(postal_code: str) -> bool:
+    """
+    Validate a postal code string.
+
+    :return: True or False
+    """
+    # REGEX USED HERE
+    pattern = re.compile(r'^[A-Z]\d[A-Z] ?\d[A-Z]\d$')
+    if pattern.search(postal_code):
+        return True
+    else:
+        return False
 
 
 def find_closest_stores(current_latitude: float, current_longitude: float) -> dict:
