@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, Tuple, Dict
 
 import populartimes
 import doctest
@@ -140,7 +140,13 @@ def get_score(store: dict):
     return distance_weight / distance + wait_time_weight / wait_time
 
 
-def write_score(func):
+def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, Any]):
+    """
+    Save the store data of the decorated function in a file.
+
+    :param func: a function
+    :return: a function
+    """
     def wrapper_score(*args, **kwargs):
         top_stores = func(*args, **kwargs)
         for store in top_stores:
