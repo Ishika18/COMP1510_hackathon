@@ -91,7 +91,6 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> li
     return data
 
 
-
 def get_store_results(payload) -> list:
     """
     Request store results from Google Places API.
