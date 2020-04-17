@@ -1,3 +1,5 @@
+from typing import Any
+
 import populartimes
 import doctest
 import requests
@@ -104,6 +106,28 @@ def get_score(store: dict):
     return distance_weight / distance + wait_time_weight / wait_time
 
 
+def write_score(func):
+    def wrapper_score(*args, **kwargs):
+        top_stores = func(*args, **kwargs)
+        for store in top_stores:
+            save_data(f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
+                      f"{store['travel_time']},{store['wait_time']},{store['vicinity']}", 'stores.csv')
+    return wrapper_score
+
+
+def save_data(data_to_save: Any, file_name: str) -> None:
+    """
+    Append the specified input data to the specified file.
+
+    :param data_to_save: an integer
+    :param file_name: a string
+    :postcondition: correctly appends the input data in the specified file
+    """
+    with open(file_name, 'a') as results:
+        results.write(str(data_to_save) + "\n")
+
+
+@write_score
 def rank_stores(stores: list):
     score_dict = {}
     for store in stores:
@@ -122,10 +146,6 @@ def generate_map(stores) -> str:
     pass
 
 
-def print_top_five_stores(stores):
-    pass
-
-
 def get_distance_url(store: dict, current_position: tuple):
     key = get_api_key()
     store_position = store['vicinity']
@@ -133,7 +153,7 @@ def get_distance_url(store: dict, current_position: tuple):
            f"units=imperial&origins={current_position[0]}, {current_position[1]}&destinations={store_position}&key={key}"
 
 
-def get_distance(stores: list, current_position: tuple) -> list:
+def get_distance(stores: list, current_position: tuple):
     # LIST SLICING
     for store in stores[:]:
         url = get_distance_url(store, current_position)
@@ -143,7 +163,6 @@ def get_distance(stores: list, current_position: tuple) -> list:
         distance_json = json.loads(res.text)
         store['distance'] = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
         store['travel_time'] = distance_json['rows']['elements'][0]['duration']['text']  # time in min
-    return stores
 
 
 def run():
@@ -156,9 +175,9 @@ def run():
             break
     stores = find_closest_stores(current_latitude, current_longitude)
     stores = get_populartimes(stores)  # ['popular_times'] ['wait_times']
-    stores = get_distance(stores, (current_latitude, current_longitude))  # ['distance']
+    get_distance(stores, (current_latitude, current_longitude))  # ['distance']
     top_five_stores = rank_stores(stores)
-    print_top_five_stores(top_five_stores)
+    #print_top_five_stores(top_five_stores)
     html_file_name = generate_map(top_five_stores)
     webbrowser.open(html_file_name)
 
