@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, Tuple, Dict
 
 import populartimes
 import doctest
@@ -112,6 +112,7 @@ def add_more_data_to_stores(stores: list):
     desired_data = ('international_phone_number', 'current_popularity', 'time_spent')
     for store in stores:
         response = populartimes.get_id(key, store['place_id'])
+        # ^raise error?
         for datum in desired_data:
             try:
                 store[datum] = response[datum]
@@ -120,7 +121,18 @@ def add_more_data_to_stores(stores: list):
                 continue
 
 
-def get_score(store: dict):
+def get_score(store: dict) -> float:
+    """
+    Get the score of specified store using decision making algorithm.
+
+    :param store: a dictionary
+    :precondition: input parameter store must be a well formed dictionary representing the store
+    :postcondition: correctly returns the score value of the score
+    :return: a float
+
+    >>> get_score({'wait_time': 20, 'distance': 2000})
+    23.0
+    """
     WAIT_TIME_WEIGHT = 60
     DISTANCE_WEIGHT = 0.4
     try:
@@ -132,7 +144,13 @@ def get_score(store: dict):
         return 0
 
 
-def write_score(func):
+def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, Any]):
+    """
+    Save the store data of the decorated function in a file.
+
+    :param func: a function
+    :return: a function
+    """
     def wrapper_score(*args, **kwargs):
         top_stores = func(*args, **kwargs)
         for store in top_stores:
@@ -224,7 +242,6 @@ def get_distance(stores: list, current_position: tuple):
     # LIST SLICING
     for store in stores[:]:
         url = get_distance_url(store, current_position)
-        print(url)
         res = requests.get(url)
         if res.status_code != requests.codes.ok:
             raise ConnectionError('error can not reach the server.')
@@ -249,7 +266,6 @@ def run():
             break
     make_score_file('stores.csv')
     stores = find_closest_stores(current_latitude, current_longitude)
-
     add_more_data_to_stores(stores)
     get_distance(stores, (current_latitude, current_longitude))
     top_five_stores = rank_stores(stores)
