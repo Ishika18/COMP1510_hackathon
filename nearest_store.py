@@ -141,7 +141,8 @@ def get_distance_url(store: dict, current_position: tuple):
 
 def get_distance(stores: list, current_position: tuple) -> list:
     key = get_api_key()
-    for store in stores:
+    # LIST SLICING
+    for store in stores[:]:
         url = get_distance_url(store, current_position)
         res = requests.get(url)
         while res.status_code != requests.codes.ok:
