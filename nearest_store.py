@@ -24,6 +24,8 @@ def get_current_location() -> tuple:
     response = requests.get(f'https://maps.googleapis.com/maps/api/geocode/json?address='
                             f'{postal_code}&key={key}')
     response.raise_for_status()
+    if response.status_code != requests.codes.ok:
+        raise ConnectionError("Server cannot be reached")
     data = get_coordinate_data(postal_code)
     lat = data['results'][0]['geometry']['location']['lat']
     lon = data['results'][0]['geometry']['location']['lng']
@@ -41,6 +43,8 @@ def get_coordinate_data(postal_code: str) -> dict:
     response = requests.get(f'https://maps.googleapis.com/maps/api/geocode/json?address='
                             f'{postal_code}&key={key}')
     response.raise_for_status()
+    if response.status_code != requests.codes.ok:
+        raise ConnectionError("Server cannot be reached")
     data = json.loads(response.text)
     if data['status'] == 'ZERO_RESULTS':
         raise ValueError("This location does not exist.")
@@ -100,6 +104,8 @@ def get_store_results(payload) -> list:
     """
     response = requests.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?', params=payload)
     response.raise_for_status()
+    if response.status_code != requests.codes.ok:
+        raise ConnectionError("Server cannot be reached")
     data = json.loads(response.text)
 
     return data['results']
@@ -112,7 +118,6 @@ def add_more_data_to_stores(stores: list):
     desired_data = ('international_phone_number', 'current_popularity', 'time_spent')
     for store in stores:
         response = populartimes.get_id(key, store['place_id'])
-        # ^raise error?
         for datum in desired_data:
             try:
                 store[datum] = response[datum]
