@@ -14,7 +14,7 @@ def get_current_location() -> tuple:
     postal_code = prompt_postal_code()
 
     key = get_api_key()
-
+    # API USED HERE
     response = requests.get(f'https://maps.googleapis.com/maps/api/geocode/json?address='
                             f'{postal_code}&key={key}')
     response.raise_for_status()
@@ -38,6 +38,7 @@ def get_coordinate_data(postal_code: str) -> dict:
 
 def prompt_postal_code() -> str:
     postal_code = input('Enter a Canadian postal code in the format \'A1A 1A1\': ')
+    # REGEX USED HERE
     pattern = re.compile(r'^[A-Z]\d[A-Z] ?\d[A-Z]\d$')
     if pattern.search(postal_code):
         return postal_code
