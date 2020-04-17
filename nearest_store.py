@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+from typing import Any, Callable, Tuple, Dict
+
+>>>>>>> 53426508595649f2723d5bf2d864bd8927be226d
 import populartimes
 import doctest
 import requests
@@ -73,12 +78,19 @@ def validate_postal_code(postal_code: str) -> bool:
         return False
 
 
-def find_closest_stores(current_latitude: float, current_longitude: float) -> dict:
+def find_closest_stores(current_latitude: float, current_longitude: float) -> list:
     """
+<<<<<<< HEAD
     Find the closest stores from response data based on current latitude and longitude.
     :param current_latitude: a float
     :param current_longitude: a float
     :return: response data as a dictionary
+=======
+    Find the closest stores from response data based on current latitude and longitude
+    :param current_latitude: a float
+    :param current_longitude: a float
+    :return: response data as a list
+>>>>>>> 53426508595649f2723d5bf2d864bd8927be226d
     """
     payload = {'location': f'{current_latitude},{current_longitude}',
                'rankby': 'distance',
@@ -89,7 +101,11 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> di
     return data
 
 
+<<<<<<< HEAD
 def get_store_results(payload) -> dict:
+=======
+def get_store_results(payload) -> list:
+>>>>>>> 53426508595649f2723d5bf2d864bd8927be226d
     """
     Request store results from Google Places API.
 
@@ -114,25 +130,53 @@ def add_more_data_to_stores(stores: list):
         for datum in desired_data:
             try:
                 store[datum] = response[datum]
-            except IndexError:
-                # Index error will occur if place does not have data available.
+            except KeyError:
+                # Key error will occur if place does not have data available.
                 continue
 
 
-def get_score(store: dict):
-    wait_time = store['wait_time']  # wait_time key will be appended with popular-times
-    wait_time_weight = 60
-    distance_weight = 40
-    distance = store['distance'] * 1000  # distance in km
-    return distance_weight / distance + wait_time_weight / wait_time
+def get_score(store: dict) -> float:
+    """
+    Get the score of specified store using decision making algorithm.
+
+    :param store: a dictionary
+    :precondition: input parameter store must be a well formed dictionary representing the store
+    :postcondition: correctly returns the score value of the score
+    :return: a float
+
+    >>> get_score({'wait_time': 20, 'distance': 2000})
+    23.0
+    """
+    WAIT_TIME_WEIGHT = 60
+    DISTANCE_WEIGHT = 0.4
+    try:
+        wait_time = store['time_spent'][0]
+        distance = store['distance']
+        print(wait_time, distance)
+        return DISTANCE_WEIGHT / distance + WAIT_TIME_WEIGHT / wait_time
+    except KeyError:
+        return 0
 
 
-def write_score(func):
+def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, Any]):
+    """
+    Save the store data of the decorated function in a file.
+
+    :param func: a function
+    :return: a function
+    """
     def wrapper_score(*args, **kwargs):
         top_stores = func(*args, **kwargs)
         for store in top_stores:
-            save_data(f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
-                      f"{store['travel_time']},{store['wait_time']},{store['vicinity']}", 'stores.csv')
+            try:
+                save_data(
+                    f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
+                    f"{store['travel_time']},{store['time_spent'][0]} mins,"
+                    f"{store['vicinity'].replace(',', '')}", 'stores.csv')
+            except KeyError:
+                save_data(
+                    f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
+                    f"{store['travel_time']},No Data,{store['vicinity'].replace(',', '')}", 'stores.csv')
     return wrapper_score
 
 
@@ -154,14 +198,14 @@ def rank_stores(stores: list):
     for store in stores:
         score = get_score(store)
         score_dict[score] = store
-    top_scores = sorted(score_dict)
+    top_scores = sorted(score_dict, reverse=True)
     # SYNTACTIC SUGAR
     return [score_dict[top_scores[i]] for i in range(5)]
 
 
 def get_api_key() -> str:
     # Do not change this api key unless you have permission
-    return 'AIzaSyAVHKBzu0YpNi3o6Y_nYSY_wzNoDTN51mQ'
+    return 'AIzaSyAJrrx5fu_XACSiqjbvS0LeoF9qzl7NeOc'
 
 
 def generate_map(stores, lat, lon) -> str:
@@ -203,9 +247,9 @@ def generate_map(stores, lat, lon) -> str:
 
 def get_distance_url(store: dict, current_position: tuple):
     key = get_api_key()
-    store_position = store['vicinity']
     return f"https://maps.googleapis.com/maps/api/distancematrix/json?" \
-           f"units=imperial&origins={current_position[0]}, {current_position[1]}&destinations={store_position}&key={key}"
+           f"units=imperial&origins={current_position[0]},{current_position[1]}" \
+           f"&destinations={store['geometry']['location']['lat']},{store['geometry']['location']['lng']}&key={key}"
 
 
 def get_distance(stores: list, current_position: tuple):
@@ -216,13 +260,14 @@ def get_distance(stores: list, current_position: tuple):
         if res.status_code != requests.codes.ok:
             raise ConnectionError('error can not reach the server.')
         distance_json = json.loads(res.text)
-        store['distance'] = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
-        store['travel_time'] = distance_json['rows']['elements'][0]['duration']['text']  # time in min
+        print(distance_json)
+        store['distance'] = distance_json['rows'][0]['elements'][0]['distance']['value']  # distance in meters
+        store['travel_time'] = distance_json['rows'][0]['elements'][0]['duration']['text']  # time in min
 
 
 def make_score_file(file_name: str):
-    with open(file_name, 'a') as results:
-        results.write("NAME,LAT,LON,TRAVEL,WAIT" + "\n")
+    with open(file_name, 'w') as results:
+        results.write("NAME,LAT,LON,TRAVEL,WAIT,ADDRESS" + "\n")
 
 
 def run():
@@ -236,7 +281,7 @@ def run():
     make_score_file('stores.csv')
     stores = find_closest_stores(current_latitude, current_longitude)
     add_more_data_to_stores(stores)
-    stores = get_distance(stores, (current_latitude, current_longitude))
+    get_distance(stores, (current_latitude, current_longitude))
     top_five_stores = rank_stores(stores)
     html_file_name = generate_map(top_five_stores, current_latitude, current_longitude)
     webbrowser.open(html_file_name)
