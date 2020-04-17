@@ -97,12 +97,13 @@ def get_populartimes(stores: list) -> list:
 
 
 def get_score(store: dict):
-    wait_time = store['wait_time']  # wait_time key will be appended with populartimes
-    distance = store['distance']
-    return wait_time / distance
+    wait_time = store['wait_time']  # wait_time key will be appended with popular-times
+    wait_time_weight = 60
+    distance_weight = 40
+    distance = store['distance'] * 1000  # distance in km
+    return distance_weight / distance + wait_time_weight / wait_time
 
 
-@decorator
 def rank_stores(stores: list):
     score_dict = {}
     for store in stores:
@@ -140,8 +141,8 @@ def get_distance(stores: list, current_position: tuple) -> list:
         if res.status_code != requests.codes.ok:
             raise ConnectionError('error can not reach the server.')
         distance_json = json.loads(res.text)
-        store_distance = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
-        store['distance'] = store_distance
+        store['distance'] = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
+        store['travel_time'] = distance_json['rows']['elements'][0]['duration']['value']
     return stores
 
 
