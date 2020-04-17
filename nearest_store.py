@@ -134,9 +134,6 @@ def get_score(store: dict) -> float:
     :precondition: input parameter store must be a well formed dictionary representing the store
     :postcondition: correctly returns the score value of the score
     :return: a float
-
-    >>> get_score({'wait_time': 20, 'distance': 2000})
-    23.0
     """
     WAIT_TIME_WEIGHT = 60
     DISTANCE_WEIGHT = 0.4
