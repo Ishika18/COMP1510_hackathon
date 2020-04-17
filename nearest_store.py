@@ -121,14 +121,14 @@ def add_more_data_to_stores(stores: list):
                 continue
 
 
-def get_score(store: dict):
+def get_score(store: dict) -> float:
     """
     Get the score of specified store using decision making algorithm.
 
     :param store: a dictionary
     :precondition: input parameter store must be a well formed dictionary representing the store
     :postcondition: correctly returns the score value of the score
-    :return: an integer
+    :return: a float
 
     >>> get_score({'wait_time': 20, 'distance': 2000})
     23.0
