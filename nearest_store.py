@@ -177,6 +177,7 @@ def save_data(data_to_save: Any, file_name: str) -> None:
 
     :param data_to_save: an integer
     :param file_name: a string
+    :precondition: file_name must be a string
     :postcondition: correctly appends the input data in the specified file
     """
     with open(file_name, 'a') as results:
