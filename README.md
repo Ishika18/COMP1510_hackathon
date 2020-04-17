@@ -17,3 +17,8 @@ Github ID: [rleung1004](https://github.com/rleung1004)
 ## Terry Lun  
 Student ID: A00855225  
 Github ID: [TerryLun](https://github.com/TerryLun)  
+
+
+pip install requests
+pip install folium
+pip install --upgrade git+https://github.com/m-wrzr/populartimes
