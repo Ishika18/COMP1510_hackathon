@@ -116,10 +116,21 @@ def add_more_data_to_stores(stores: list):
 
 
 def get_score(store: dict):
+    """
+    Get the score of specified store using decision making algorithm.
+
+    :param store: a dictionary
+    :precondition: input parameter store must be a well formed dictionary representing the store
+    :postcondition: correctly returns the score value of the score
+    :return: an integer
+
+    >>> get_score({'wait_time': 20, 'distance': 2000})
+    23.0
+    """
     wait_time = store['wait_time']  # wait_time key will be appended with popular-times
     wait_time_weight = 60
     distance_weight = 40
-    distance = store['distance'] * 1000  # distance in km
+    distance = store['distance'] / 1000  # distance in km
     return distance_weight / distance + wait_time_weight / wait_time
 
 
