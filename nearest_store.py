@@ -77,17 +77,10 @@ def validate_postal_code(postal_code: str) -> bool:
 
 def find_closest_stores(current_latitude: float, current_longitude: float) -> list:
     """
-<<<<<<< HEAD
-    Find the closest stores from response data based on current latitude and longitude.
-    :param current_latitude: a float
-    :param current_longitude: a float
-    :return: response data as a dictionary
-=======
     Find the closest stores from response data based on current latitude and longitude
     :param current_latitude: a float
     :param current_longitude: a float
     :return: response data as a list
->>>>>>> 53426508595649f2723d5bf2d864bd8927be226d
     """
     payload = {'location': f'{current_latitude},{current_longitude}',
                'rankby': 'distance',
