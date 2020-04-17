@@ -216,6 +216,11 @@ def get_distance(stores: list, current_position: tuple):
         store['travel_time'] = distance_json['rows']['elements'][0]['duration']['text']  # time in min
 
 
+def make_score_file(file_name: str):
+    with open(file_name, 'a') as results:
+        results.write("NAME,LAT,LON,TRAVEL,WAIT" + "\n")
+
+
 def run():
     while True:
         try:
@@ -224,6 +229,7 @@ def run():
             print(error_message)
         else:
             break
+    make_score_file('stores.csv')
     stores = find_closest_stores(current_latitude, current_longitude)
     add_more_data_to_stores(stores)
     stores = get_distance(stores, (current_latitude, current_longitude))
