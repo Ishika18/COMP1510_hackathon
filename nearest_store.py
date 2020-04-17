@@ -122,10 +122,10 @@ def add_more_data_to_stores(stores: list):
 
 def get_score(store: dict):
     WAIT_TIME_WEIGHT = 60
-    DISTANCE_WEIGHT = 40
+    DISTANCE_WEIGHT = 0.4
     try:
         wait_time = store['time_spent'][0]
-        distance = store['distance'] / 1000  # distance in km
+        distance = store['distance']
         print(wait_time, distance)
         return DISTANCE_WEIGHT / distance + WAIT_TIME_WEIGHT / wait_time
     except KeyError:
@@ -139,11 +139,12 @@ def write_score(func):
             try:
                 save_data(
                     f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
-                    f"{store['travel_time']},{store['wait_time']},{store['vicinity'].replace(',', '')}", 'stores.csv')
+                    f"{store['travel_time']},{store['time_spent'][0]} mins,"
+                    f"{store['vicinity'].replace(',', '')}", 'stores.csv')
             except KeyError:
                 save_data(
                     f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
-                    f"{store['travel_time']},1000,{store['vicinity'].replace(',', '')}", 'stores.csv')
+                    f"{store['travel_time']},No Data,{store['vicinity'].replace(',', '')}", 'stores.csv')
     return wrapper_score
 
 
