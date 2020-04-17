@@ -133,13 +133,12 @@ def get_distance_url(store: dict, current_position: tuple):
 
 
 def get_distance(stores: list, current_position: tuple) -> list:
-    key = get_api_key()
     # LIST SLICING
     for store in stores[:]:
         url = get_distance_url(store, current_position)
         res = requests.get(url)
-        while res.status_code != requests.codes.ok:
-            pass
+        if res.status_code != requests.codes.ok:
+            raise ConnectionError('error can not reach the server.')
         distance_json = json.loads(res.text)
         store_distance = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
         store['distance'] = store_distance
