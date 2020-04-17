@@ -74,6 +74,12 @@ def validate_postal_code(postal_code: str) -> bool:
 
 
 def find_closest_stores(current_latitude: float, current_longitude: float) -> dict:
+    """
+    Find the closest stores from
+    :param current_latitude:
+    :param current_longitude:
+    :return:
+    """
     payload = {'location': f'{current_latitude},{current_longitude}',
                'rankby': 'distance',
                'type': 'grocery_or_supermarket',
@@ -114,7 +120,8 @@ def rank_stores(stores: list):
 
 
 def get_api_key() -> str:
-    return 'API KEY'
+    # Do not change this api key unless you have permission
+    return 'AIzaSyAVHKBzu0YpNi3o6Y_nYSY_wzNoDTN51mQ'
 
 
 def generate_map(stores) -> str:
