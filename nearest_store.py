@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 from typing import Any, Callable, Tuple, Dict
 
->>>>>>> 53426508595649f2723d5bf2d864bd8927be226d
 import populartimes
 import doctest
 import requests
@@ -101,11 +98,8 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> li
     return data
 
 
-<<<<<<< HEAD
-def get_store_results(payload) -> dict:
-=======
+
 def get_store_results(payload) -> list:
->>>>>>> 53426508595649f2723d5bf2d864bd8927be226d
     """
     Request store results from Google Places API.
 
