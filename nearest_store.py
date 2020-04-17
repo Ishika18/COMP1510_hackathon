@@ -142,7 +142,7 @@ def get_distance(stores: list, current_position: tuple) -> list:
             raise ConnectionError('error can not reach the server.')
         distance_json = json.loads(res.text)
         store['distance'] = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
-        store['travel_time'] = distance_json['rows']['elements'][0]['duration']['value']
+        store['travel_time'] = distance_json['rows']['elements'][0]['duration']['text']  # time in min
     return stores
 
 
