@@ -19,11 +19,9 @@ Student ID: A00855225
 Github ID: [TerryLun](https://github.com/TerryLun)  
 
 
-`$ pip install json`  
 `$ pip install requests`  
 `$ pip install folium`  
 `$ pip install pandas`  
-`$ pip install webbrowser`  
 `$ pip install --upgrade git+https://github.com/m-wrzr/populartimes`  
 
 
