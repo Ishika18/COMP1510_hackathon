@@ -76,6 +76,12 @@ def validate_postal_code(postal_code: str) -> bool:
 
 
 def find_closest_stores(current_latitude: float, current_longitude: float) -> dict:
+    """
+    Find the closest stores from
+    :param current_latitude:
+    :param current_longitude:
+    :return:
+    """
     payload = {'location': f'{current_latitude},{current_longitude}',
                'rankby': 'distance',
                'type': 'grocery_or_supermarket',
@@ -93,9 +99,20 @@ def get_store_results(payload) -> dict:
     return data['results']
 
 
-def get_populartimes(stores: list) -> list:
+def add_more_data_to_stores(stores: list):
     """ use set """
-    pass
+    key = get_api_key()
+    # SET USED HERE
+    desired_data = ('international_phone_number', 'current_popularity', 'time_spent')
+    for store in stores:
+        response = populartimes.get_id(key, store['place_id'])
+        # ^raise error?
+        for datum in desired_data:
+            try:
+                store[datum] = response[datum]
+            except IndexError:
+                # Index error will occur if place does not have data available.
+                continue
 
 
 def get_score(store: dict):
@@ -139,11 +156,45 @@ def rank_stores(stores: list):
 
 
 def get_api_key() -> str:
-    return 'API KEY'
+    # Do not change this api key unless you have permission
+    return 'AIzaSyAVHKBzu0YpNi3o6Y_nYSY_wzNoDTN51mQ'
 
 
-def generate_map(stores) -> str:
-    pass
+def generate_map(stores, lat, lon) -> str:
+    # name of the html file
+    html_file_name = 'local_map.html'
+    icon_size = (50, 35)
+    initial_zoom_level = 12
+
+    # initialize map
+    local_map = folium.Map(location=[lat, lon], zoom_start=initial_zoom_level)
+
+    # add marker for current location
+    folium.CircleMarker(location=(lat, lon), radius=9, tooltip='Current location',
+                        color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
+
+    # parse data
+    data = pandas.read_csv('stores.csv')
+    store_name = list(data['NAME'])
+    store_latitude = list(data['LAT'])
+    store_longitude = list(data['LON'])
+    wait_time = list(data['WAIT'])
+    travel_time = list(data['TRAVEL'])
+
+    # add each store as marker
+    for i, (name, lat, lon, travel, wait) in enumerate(zip(store_name, store_latitude, store_longitude, travel_time,
+                                                           wait_time), 1):
+        html_content = """<h1>%s</h1>
+        <p>Estimated travel time: %s</p>
+        <p>Current wait time: %s</p>
+        """
+        folium.Marker([lat, lon], popup=html_content % (name, travel, wait), tooltip='Click for more info.',
+                      icon=folium.features.CustomIcon(f'{i}.png', icon_size=icon_size)).add_to(local_map)
+
+    # generate html file
+    local_map.save(html_file_name)
+
+    return html_file_name
 
 
 def get_distance_url(store: dict, current_position: tuple):
@@ -174,10 +225,9 @@ def run():
         else:
             break
     stores = find_closest_stores(current_latitude, current_longitude)
-    stores = get_populartimes(stores)  # ['popular_times'] ['wait_times']
-    get_distance(stores, (current_latitude, current_longitude))  # ['distance']
+    add_more_data_to_stores(stores)
+    stores = get_distance(stores, (current_latitude, current_longitude))
     top_five_stores = rank_stores(stores)
-    #print_top_five_stores(top_five_stores)
     html_file_name = generate_map(top_five_stores)
     webbrowser.open(html_file_name)
 
