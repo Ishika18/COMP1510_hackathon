@@ -64,7 +64,7 @@ def get_store_results(payload) -> dict:
     return data['results']
 
 
-def get_populartimes(key: str, stores: list) -> list:
+def get_populartimes(stores: list) -> list:
     """ use set """
     pass
 
