@@ -103,9 +103,20 @@ def get_store_results(payload) -> dict:
     return data['results']
 
 
-def get_populartimes(stores: list) -> list:
+def add_more_data_to_stores(stores: list):
     """ use set """
-    pass
+    key = get_api_key()
+    # SET USED HERE
+    desired_data = ('international_phone_number', 'current_popularity', 'time_spent')
+    for store in stores:
+        response = populartimes.get_id(key, store['place_id'])
+        # ^raise error?
+        for datum in desired_data:
+            try:
+                store[datum] = response[datum]
+            except IndexError:
+                # Index error will occur if place does not have data available.
+                continue
 
 
 def get_score(store: dict):
@@ -168,7 +179,7 @@ def run():
         else:
             break
     stores = find_closest_stores(current_latitude, current_longitude)
-    stores = get_populartimes(stores)  # ['popular_times'] ['wait_times']
+    add_more_data_to_stores(stores)  # ['popular_times'] ['wait_times']
     stores = get_distance(stores, (current_latitude, current_longitude))  # ['distance']
     top_five_stores = rank_stores(stores)
     print_top_five_stores(top_five_stores)
