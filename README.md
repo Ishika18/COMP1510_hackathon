@@ -20,6 +20,7 @@ Github ID: [TerryLun](https://github.com/TerryLun)
 
 ## Installation Instructions
 In terminal:
+
 `$ pip install requests`  
 `$ pip install folium`  
 `$ pip install pandas`  
