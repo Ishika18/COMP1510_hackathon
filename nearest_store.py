@@ -30,7 +30,7 @@ def get_current_location() -> tuple:
 
 def get_coordinate_data(postal_code: str) -> dict:
     """
-    Request coordinate data based on user's input postal code.
+    Request coordinate data from Geolocation API based on user's input postal code.
 
     :param postal_code: a string
     :return: response data as a dictionary
@@ -75,10 +75,10 @@ def validate_postal_code(postal_code: str) -> bool:
 
 def find_closest_stores(current_latitude: float, current_longitude: float) -> dict:
     """
-    Find the closest stores from
-    :param current_latitude:
-    :param current_longitude:
-    :return:
+    Find the closest stores from response data based on current latitude and longitude.
+    :param current_latitude: a float
+    :param current_longitude: a float
+    :return: response data as a dictionary
     """
     payload = {'location': f'{current_latitude},{current_longitude}',
                'rankby': 'distance',
@@ -90,6 +90,12 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> di
 
 
 def get_store_results(payload) -> dict:
+    """
+    Request store results from Google Places API.
+
+    :param payload: a dictionary of parameter required for the API request
+    :return: data results as a dictionary
+    """
     response = requests.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?', params=payload)
     response.raise_for_status()
     data = json.loads(response.text)
