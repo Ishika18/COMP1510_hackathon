@@ -64,17 +64,30 @@ def get_store_results(payload) -> dict:
     return data['results']
 
 
-def get_populartimes(key: str, stores: list) -> list:
+def get_populartimes(stores: list) -> list:
     """ use set """
     pass
 
 
+def get_score(store: dict):
+    wait_time = store['wait_time']  # wait_time key will be appended with populartimes
+    distance = store['distance']
+    return wait_time / distance
+
+
+@decorator
 def rank_stores(stores: list):
-    pass
+    score_dict = {}
+    for store in stores:
+        score = get_score(store)
+        score_dict[score] = store
+    top_scores = sorted(score_dict)
+    # SYNTACTIC SUGAR
+    return [score_dict[top_scores[i]] for i in range(5)]
 
 
 def get_api_key() -> str:
-    return 'AIzaSyAVHKBzu0YpNi3o6Y_nYSY_wzNoDTN51mQ'
+    return 'API KEY'
 
 
 def generate_map(stores) -> str:
@@ -85,8 +98,24 @@ def print_top_five_stores(stores):
     pass
 
 
-def get_distance(key, stores) -> list:
-    pass
+def get_distance_url(store: dict, current_position: tuple):
+    key = get_api_key()
+    store_position = store['vicinity']
+    return f"https://maps.googleapis.com/maps/api/distancematrix/json?" \
+           f"units=imperial&origins={current_position[0]}, {current_position[1]}&destinations={store_position}&key={key}"
+
+
+def get_distance(stores: list, current_position: tuple) -> list:
+    key = get_api_key()
+    for store in stores:
+        url = get_distance_url(store, current_position)
+        res = requests.get(url)
+        while res.status_code != requests.codes.ok:
+            pass
+        distance_json = json.loads(res.text)
+        store_distance = distance_json['rows']['elements'][0]['distance']['value']  # distance in meters
+        store['distance'] = store_distance
+    return stores
 
 
 def run():
@@ -98,12 +127,12 @@ def run():
         else:
             break
     stores = find_closest_stores(current_latitude, current_longitude)
-    # stores = get_populartimes(key, stores)  # ['popular_times'] ['wait_times']
-    # stores = get_distance(key, stores)  # ['distance']
-    # rank_stores(stores)
-    # print_top_five_stores(stores)
-    # html_file_name = generate_map(stores)
-    # webbrowser.open(html_file_name)
+    stores = get_populartimes(stores)  # ['popular_times'] ['wait_times']
+    stores = get_distance(stores, (current_latitude, current_longitude))  # ['distance']
+    top_five_stores = rank_stores(stores)
+    print_top_five_stores(top_five_stores)
+    html_file_name = generate_map(top_five_stores)
+    webbrowser.open(html_file_name)
 
 
 def main():
