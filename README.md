@@ -23,4 +23,7 @@ Github ID: [TerryLun](https://github.com/TerryLun)
 `$ pip install requests`  
 `$ pip install folium`  
 `$ pip install pandas`  
+`$ pip install webbrowser`  
 `$ pip install --upgrade git+https://github.com/m-wrzr/populartimes`  
+
+
