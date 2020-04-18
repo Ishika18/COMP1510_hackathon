@@ -16,6 +16,10 @@ def get_current_location() -> tuple:
     """
     Return the latitude and longitude of the user.
 
+    :precondition: google servers return either correctly formatted data or a faulty response-code
+    :postcondition: return an object as defined by the return statement below or raise an error in the case of the
+    error statement
+    :raise ConnectionError: if the google server does not properly respond to the get request
     :return: the latitude as a float and longitude as a float in a tuple
     """
     postal_code = prompt_postal_code()
@@ -38,6 +42,11 @@ def get_coordinate_data(postal_code: str) -> dict:
     Request coordinate data based on user's input postal code.
 
     :param postal_code: a string
+    :precondition: google servers return either correctly formatted data or a faulty response-code
+    :postcondition: return an object as defined by the return statement below or raise an error as defined in the
+    return statements below
+    :raise ConnectionError: if the Google servers cannot be reached
+    :raise ValueError: if the location does not exist
     :return: response data as a dictionary
     """
     key = get_api_key()
@@ -57,6 +66,10 @@ def prompt_postal_code() -> str:
     """
     Prompt the user to enter a postal code.
 
+    :precondition: provide the function with no parameters
+    :postcondition: return an object as defined by the return statement or raise an error as defined in the error
+    statements below
+    :raise ValueError: if the postal code is not in the format as defined by the REGEX string in validate_postal_code
     :return: a validated postal code as a string
     """
     postal_code = input('Enter a Canadian postal code in the format \'A1A 1A1\': ')
@@ -70,6 +83,9 @@ def validate_postal_code(postal_code: str) -> bool:
     """
     Validate a postal code string non-case sensitive.
 
+    :param postal_code: a str
+    :precondition: the function is provided with an argument as defined in the PARAM statement above
+    :postcondition: return an object as defined by the return statement below
     :return: True or False
 
     >>> validate_postal_code('111 111')
@@ -94,8 +110,13 @@ def validate_postal_code(postal_code: str) -> bool:
 def find_closest_stores(current_latitude: float, current_longitude: float) -> list:
     """
     Find the closest stores from response data based on current latitude and longitude
+
     :param current_latitude: a float
     :param current_longitude: a float
+    :precondition: the function is provided with valid arguments according the param statements above
+    :postcondition: return an object as defined by the return statement below or raise an error as defined by the
+    error statements below
+    :raise ConnectionError: if the google servers cannot be reached
     :return: response data as a list
     """
     payload = {'location': f'{current_latitude},{current_longitude}',
@@ -113,6 +134,10 @@ def get_store_results(payload) -> list:
     Request store results from Google Places API.
 
     :param payload: a dictionary of parameter required for the API request
+    :precondition: the Google servers respond with either a properly formatted response or a faulty status code
+    :postcondition: return an object as defined by the return statement below or raise an error as defined by the
+    error statements below
+    :raise ConnectionError: if the Google servers cannot be reached
     :return: data results as a dictionary
     """
     response = requests.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?', params=payload)
@@ -129,8 +154,8 @@ def add_more_data_to_stores(stores: list):
     Add more information in the existing list of stores.
 
     :param stores: a list of dictionaries representing stores from Google Places API
-    :precondition: stores should be a correctly formatted list of dictionaries
-    :postcondition: add new key value to stores in existing list
+    :precondition: the Populartimes library does not have version conflicts with the Google Places API
+    :postcondition: add all new items to stores in existing list
     """
     key = get_api_key()
     # SET USED HERE
