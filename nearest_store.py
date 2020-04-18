@@ -430,13 +430,11 @@ def run():
             rank_stores(stores)
             print_stores(file_name)
             html_file_name = generate_map(file_name, current_latitude, current_longitude)
-            platform = sys.platform
-            if platform == 'win32':
-                webbrowser.open(html_file_name)
-            else:
-                # PEP violation is required for the path to work for Mac system
+            if sys.platform == 'darwin':
                 path = r'open -a /Applications/Google\ Chrome.app %s'
                 webbrowser.get(path).open(html_file_name)
+            else:
+                webbrowser.open(html_file_name)
         except (ConnectionError, ValueError, IndexError) as error_message:
             print(error_message)
         finally:
