@@ -192,6 +192,11 @@ def save_data(data_to_save: Any, file_name: str):
 
 @write_score
 def rank_stores(stores: list):
+    """
+
+    :param stores:
+    :return:
+    """
     CUTOFF = 5
     score_dict = {}
     for store in stores:
@@ -212,9 +217,9 @@ def get_api_key() -> str:
 
 def parse_data(file_name):
     data = pandas.read_csv(file_name)
-    store_attribute_keys = ['store_name', 'store_latitude', 'store_longitude', 'wait_time', 'travel_time',
+    store_attribute_keys = ['store_name', 'store_latitude', 'store_longitude', 'travel_time', 'wait_time',
                             'store_address', 'store_popularity']
-    store_attribute_values = [list(data['NAME']), list(data['LAT']),
+    store_attribute_values = [list(data['NAME']), list(data['LAT']), list(data['LON']), list(data['TRAVEL']),
                               list(data['WAIT']), list(data['ADDRESS']), list(data['POPULARITY'])]
     # DICTIONARY COMPREHENSION
     store_attributes = {key: value for key, value in zip(store_attribute_keys, store_attribute_values)}
@@ -288,6 +293,19 @@ def make_score_file():
     return FILE_NAME
 
 
+def print_stores(file_name: str):
+    store_data = parse_data(file_name)
+    store_amount = len(store_data['store_name'])
+    print("---------------------------------")
+    for i, store in enumerate(range(store_amount), 1):
+        print("%d. %s " % (i, store_data['store_name'][store]))
+        print("Travel Time: %s" % (store_data['travel_time'][store]))
+        print("Crowdedness: %s" % (store_data['store_popularity'][store]))
+        print("Wait Time: %s" % (store_data['wait_time'][store]))
+        print("---------------------------------")
+
+
+
 def run():
     user_input = None
     file_name = make_score_file()
@@ -298,6 +316,7 @@ def run():
             add_more_data_to_stores(stores)
             get_distance(stores, (current_latitude, current_longitude))
             rank_stores(stores)
+            print_stores(file_name)
             html_file_name = generate_map(file_name, current_latitude, current_longitude)
             webbrowser.open(html_file_name)
         except ValueError as error_message:
