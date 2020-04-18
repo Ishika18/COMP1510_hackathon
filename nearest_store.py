@@ -9,11 +9,13 @@ import folium
 import pandas
 import re
 import itertools
+import sys
 
 
 def get_current_location() -> tuple:
     """
     Return the latitude and longitude of the user.
+
     :return: the latitude as a float and longitude as a float in a tuple
     """
     postal_code = prompt_postal_code()
@@ -34,6 +36,7 @@ def get_current_location() -> tuple:
 def get_coordinate_data(postal_code: str) -> dict:
     """
     Request coordinate data based on user's input postal code.
+
     :param postal_code: a string
     :return: response data as a dictionary
     """
@@ -53,6 +56,7 @@ def get_coordinate_data(postal_code: str) -> dict:
 def prompt_postal_code() -> str:
     """
     Prompt the user to enter a postal code.
+
     :return: a validated postal code as a string
     """
     postal_code = input('Enter a Canadian postal code in the format \'A1A 1A1\': ')
@@ -65,6 +69,7 @@ def prompt_postal_code() -> str:
 def validate_postal_code(postal_code: str) -> bool:
     """
     Validate a postal code string.
+
     :return: True or False
     """
     # REGEX USED HERE
@@ -93,6 +98,7 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> li
 def get_store_results(payload) -> list:
     """
     Request store results from Google Places API.
+
     :param payload: a dictionary of parameter required for the API request
     :return: data results as a dictionary
     """
@@ -129,6 +135,7 @@ def add_more_data_to_stores(stores: list):
 def get_score(store: dict) -> float:
     """
     Get the score of specified store using decision making algorithm.
+
     :param store: a dictionary
     :precondition: input parameter store must be a well formed dictionary representing the store
     :postcondition: correctly returns the score value of the score
@@ -152,6 +159,7 @@ def get_score(store: dict) -> float:
 def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, Any]):
     """
     Save the store data of the decorated function in a file.
+
     :param func: a function
     :return: a function
     """
@@ -166,12 +174,14 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                     f"{store['vicinity'].replace(',', '')},{store['current_popularity']}", 'stores.csv')
             except KeyError:
                 pass
+
     return wrapper_score
 
 
 def save_data(data_to_save: Any, file_name: str):
     """
     Append the specified input data to the specified file.
+
     :param data_to_save: an integer
     :param file_name: a string
     :precondition: file_name must be a string
@@ -181,6 +191,7 @@ def save_data(data_to_save: Any, file_name: str):
         results.write(str(data_to_save) + "\n")
 
 
+# FUNCTION DECORATOR
 @write_score
 def rank_stores(stores: list) -> list:
     """
@@ -206,9 +217,9 @@ def rank_stores(stores: list) -> list:
 
 def get_api_key() -> str:
     """
-    Return the google api key.
+    Return the api key constant.
 
-    :return: a string
+    :return: an api key as a string
     """
     # Do not change this api key unless you have permission
     return 'AIzaSyBw6AIHV6RIhH4b_Z-2iJI_LX5GGJIt7zI'
@@ -258,6 +269,7 @@ def generate_map(file_name, lat, lon) -> str:
 
     # add each store as marker
     store_amount = len(store_attributes['store_name'])
+    # USED ITERTOOLS MODULE HERE
     for i in itertools.islice(itertools.count(), store_amount):
         html_content = """<h1>%s</h1>
         <p>Estimated travel time: %s</p>
@@ -333,6 +345,7 @@ def print_stores(file_name: str):
     if store_amount == 0:
         print("There are no stores open near you.")
     else:
+        # USED ENUMERATE HERE AND FORMATTED OUTPUTS
         for i, store in enumerate(range(store_amount), 1):
             print("%d. %s " % (i, store_data['store_name'][store]))
             print("Travel Time: %s" % (store_data['travel_time'][store]))
@@ -342,6 +355,7 @@ def print_stores(file_name: str):
 
 
 def run():
+    # USED TRY FINALLY HERE
     user_input = None
     file_name = make_score_file()
     while user_input != 'q':
@@ -353,12 +367,12 @@ def run():
             rank_stores(stores)
             print_stores(file_name)
             html_file_name = generate_map(file_name, current_latitude, current_longitude)
-            webbrowser.open(html_file_name)
-        except ValueError as error_message:
-            print(error_message)
-        except ConnectionError as error_message:
-            print(error_message)
-        except IndexError as error_message:
+            platform = sys.platform
+            if platform == 'win32':
+                webbrowser.open(html_file_name)
+            else:
+                webbrowser.get('open -a /Applications/Google Chrome.app %s').open(html_file_name)
+        except (ConnectionError, ValueError, IndexError) as error_message:
             print(error_message)
         finally:
             user_input = input("Enter 'q' to quit, enter anything else to try again: ").strip().lower()
