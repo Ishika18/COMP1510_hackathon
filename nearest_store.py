@@ -4,7 +4,7 @@ import populartimes
 import doctest
 import requests
 import json
-import itertools
+import more_itertools
 import webbrowser
 import folium
 import pandas
@@ -72,7 +72,7 @@ def validate_postal_code(postal_code: str) -> bool:
     :return: True or False
     """
     # REGEX USED HERE
-    pattern = re.compile(r'^[A-Z]\d[A-Z] ?\d[A-Z]\d$')
+    pattern = re.compile(r'^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$')
     if pattern.search(postal_code):
         return True
     else:
@@ -115,7 +115,7 @@ def add_more_data_to_stores(stores: list):
     """ use set """
     key = get_api_key()
     # SET USED HERE
-    desired_data = ('international_phone_number', 'current_popularity', 'time_spent')
+    desired_data = {'international_phone_number', 'current_popularity', 'time_spent'}
     for store in stores:
         response = populartimes.get_id(key, store['place_id'])
         for datum in desired_data:
@@ -135,13 +135,14 @@ def get_score(store: dict) -> float:
     :postcondition: correctly returns the score value of the score
     :return: a float
     """
-    WAIT_TIME_WEIGHT = 60
-    DISTANCE_WEIGHT = 0.4
+    SECONDS = 60
+    WAIT_TIME_WEIGHT = 90  # lower wait time is weighted higher
+    TRAVEL_WEIGHT = 10  # travel time is weighted lower because driving is better than waiting
     try:
         wait_time = store['time_spent'][0]
-        distance = store['distance']
-        print(wait_time, distance)
-        return DISTANCE_WEIGHT / distance + WAIT_TIME_WEIGHT / wait_time
+        travel_time = store['time_value'] / SECONDS
+        return TRAVEL_WEIGHT / travel_time + WAIT_TIME_WEIGHT / wait_time
+
     except KeyError:
         return 0
 
@@ -183,13 +184,14 @@ def save_data(data_to_save: Any, file_name: str) -> None:
 
 @write_score
 def rank_stores(stores: list):
+    CUTOFF = 5
     score_dict = {}
     for store in stores:
         score = get_score(store)
         score_dict[score] = store
     top_scores = sorted(score_dict, reverse=True)
-    # SYNTACTIC SUGAR
-    return [score_dict[top_scores[i]] for i in range(5)]
+    # SYNTACTIC SUGAR AND RANGE AND ITERTOOLS
+    return [score_dict[top_scores[i]] for i in range(CUTOFF)]
 
 
 def get_api_key() -> str:
@@ -197,7 +199,7 @@ def get_api_key() -> str:
     return 'AIzaSyAJrrx5fu_XACSiqjbvS0LeoF9qzl7NeOc'
 
 
-def generate_map(stores, lat, lon) -> str:
+def generate_map(file_name, lat, lon) -> str:
     # name of the html file
     html_file_name = 'local_map.html'
     icon_size = (50, 35)
@@ -211,7 +213,7 @@ def generate_map(stores, lat, lon) -> str:
                         color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
 
     # parse data
-    data = pandas.read_csv('stores.csv')
+    data = pandas.read_csv(file_name)
     store_name = list(data['NAME'])
     store_latitude = list(data['LAT'])
     store_longitude = list(data['LON'])
@@ -249,14 +251,17 @@ def get_distance(stores: list, current_position: tuple):
         if res.status_code != requests.codes.ok:
             raise ConnectionError('error can not reach the server.')
         distance_json = json.loads(res.text)
-        print(distance_json)
         store['distance'] = distance_json['rows'][0]['elements'][0]['distance']['value']  # distance in meters
         store['travel_time'] = distance_json['rows'][0]['elements'][0]['duration']['text']  # time in min
+        store['time_value'] = distance_json['rows'][0]['elements'][0]['duration']['value']
 
 
-def make_score_file(file_name: str):
-    with open(file_name, 'w') as results:
+def make_score_file():
+    FILE_NAME = 'stores.csv'
+    with open(FILE_NAME, 'w') as results:
         results.write("NAME,LAT,LON,TRAVEL,WAIT,ADDRESS" + "\n")
+
+    return FILE_NAME
 
 
 def run():
@@ -267,12 +272,12 @@ def run():
             print(error_message)
         else:
             break
-    make_score_file('stores.csv')
+    file_name = make_score_file()
     stores = find_closest_stores(current_latitude, current_longitude)
     add_more_data_to_stores(stores)
     get_distance(stores, (current_latitude, current_longitude))
     top_five_stores = rank_stores(stores)
-    html_file_name = generate_map(top_five_stores, current_latitude, current_longitude)
+    html_file_name = generate_map(file_name, current_latitude, current_longitude)
     webbrowser.open(html_file_name)
 
 
