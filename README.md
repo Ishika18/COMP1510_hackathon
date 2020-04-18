@@ -25,7 +25,23 @@ In terminal:
 `$ pip install folium`  
 `$ pip install pandas`  
 `$ pip install --upgrade git+https://github.com/m-wrzr/populartimes`  
-`$ pip install more-itertools`  
+
+Please also install the latest version of Google Chrome.  
+Link is provided below.  
+https://support.google.com/chrome/answer/95346?co=GENIE.Platform%3DDesktop&hl=en&oco=0
+
+## Special Notes
+Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. 
+The API call is SKU'd as "Find Current Place" with additional Data SKUs (Basic Data, Contact Data, Atmosphere Data). 
+As of February 2018, you can make 5000 calls with the alloted monthly budget. For more information check 
+https://developers.google.com/places/web-service/usage-and-billing and 
+https://cloud.google.com/maps-platform/pricing/sheet/#places.
+
+##Credits
+https://github.com/m-wrzr/populartimes  
+Used under the MIT license.
+
+Web Icons Designed by Kraphix / Freepik
 
 ## Paired Programming 
 #### Ryan - Ronald
@@ -34,7 +50,7 @@ commit implemented: get_current_location() and get_coordinate_data() - dd95545a4
 76 additions
 
 #### All team members
-commit implemented: we did alot of work - 3a5fb1157650db58a19458df0def6b947a29f8e7
+commit implemented: we did a lot of work - 3a5fb1157650db58a19458df0def6b947a29f8e7
 
 34 additions, 22 deletions
 
