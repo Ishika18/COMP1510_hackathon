@@ -81,12 +81,25 @@ def prompt_postal_code() -> str:
 
 def validate_postal_code(postal_code: str) -> bool:
     """
-    Validate a postal code string.
+    Validate a postal code string non-case sensitive.
 
     :param postal_code: a str
     :precondition: the function is provided with an argument as defined in the PARAM statement above
     :postcondition: return an object as defined by the return statement below
     :return: True or False
+
+    >>> validate_postal_code('111 111')
+    False
+    >>> validate_postal_code('XXX XXX')
+    False
+    >>> validate_postal_code('1X1 X1X')
+    False
+    >>> validate_postal_code('A1A 1A1')
+    True
+    >>> validate_postal_code('a1a 1a1')
+    True
+    >>> validate_postal_code('A1A1A1')
+    True
     """
     # REGEX USED HERE
     pattern = re.compile(r'^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$')
@@ -199,7 +212,6 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                     f"{store['vicinity'].replace(',', '')},{store['current_popularity']}", 'stores.csv')
             except KeyError:
                 pass
-
     return wrapper_score
 
 
@@ -267,14 +279,14 @@ def parse_data(file_name: str) -> dict:
     return store_attributes
 
 
-def generate_map(file_name, lat, lon) -> str:
+def generate_map(file_name: str, lat: float, lon: float) -> str:
     """
+    Return the html file name with appended html elements inside the file.
 
-
-    :param file_name:
-    :param lat:
-    :param lon:
-    :return:
+    :param file_name: a string representing the valid file name
+    :param lat: a float
+    :param lon: a float
+    :return: a string, representing the html file name
     """
     # name of the html file
     html_file_name = 'local_map.html'
@@ -364,6 +376,13 @@ def make_score_file() -> str:
 
 
 def print_stores(file_name: str):
+    """
+    Print the stores information in a user friendly manner.
+
+    :param file_name: a string, representing the file name containing stores information
+    :precondition: input parameter file_name must be a string representing valid file name
+    :postcondition: correctly prints the information of the stores
+    """
     store_data = parse_data(file_name)
     store_amount = len(store_data['store_name'])
     print("---------------------------------")
@@ -380,6 +399,9 @@ def print_stores(file_name: str):
 
 
 def run():
+    """
+    Run the functions.
+    """
     # USED TRY FINALLY HERE
     user_input = None
     file_name = make_score_file()
@@ -396,7 +418,7 @@ def run():
             if platform == 'win32':
                 webbrowser.open(html_file_name)
             else:
-                webbrowser.get('open -a /Applications/Google Chrome.app %s').open(html_file_name)
+                webbrowser.get('open -a /Applications/Google\ Chrome.app %s').open(html_file_name)
         except (ConnectionError, ValueError, IndexError) as error_message:
             print(error_message)
         finally:
@@ -404,6 +426,9 @@ def run():
 
 
 def main():
+    """
+    Run the program.
+    """
     doctest.testmod()
     run()
 
