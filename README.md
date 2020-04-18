@@ -39,7 +39,7 @@ As of February 2018, you can make 5000 calls with the alloted monthly budget. Fo
 https://developers.google.com/places/web-service/usage-and-billing and 
 https://cloud.google.com/maps-platform/pricing/sheet/#places.
 
-##Credits
+## Credits
 https://github.com/m-wrzr/populartimes  
 Used under the MIT license.
 
