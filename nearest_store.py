@@ -189,7 +189,6 @@ def get_score(store: dict) -> float:
         travel_time = store['time_value'] / SECONDS
         store_popularity = store['current_popularity']
         return TRAVEL_WEIGHT / travel_time + WAIT_TIME_WEIGHT / wait_time + POPULAR_WEIGHT / store_popularity
-
     except KeyError:
         return 0
 
@@ -199,6 +198,8 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
     Save the store data of the decorated function in a file.
 
     :param func: a function
+    :precondition: input parameter must be a function
+    :postcondition: correctly writes the store data to the file
     :return: a function
     """
 
@@ -256,7 +257,11 @@ def get_api_key() -> str:
     """
     Return the api key constant.
 
+    :postcondition: returns the correct api key
     :return: an api key as a string
+
+    >>> get_api_key()
+    'AIzaSyBw6AIHV6RIhH4b_Z-2iJI_LX5GGJIt7zI'
     """
     # Do not change this api key unless you have permission
     return 'AIzaSyBw6AIHV6RIhH4b_Z-2iJI_LX5GGJIt7zI'
@@ -267,6 +272,8 @@ def parse_data(file_name: str) -> dict:
     Return the store attributes of the stores in the specified file name.
 
     :param file_name: a string, representing the file name containing stores information
+    :precondition: file_name must be a string of valid file name
+    :postcondition: correclty parses and returns the store attribute data
     :return: a dictionary of store attributes
     """
     data = pandas.read_csv(file_name)
@@ -286,6 +293,8 @@ def generate_map(file_name: str, lat: float, lon: float) -> str:
     :param file_name: a string representing the valid file name
     :param lat: a float
     :param lon: a float
+    :precondition: file_name, lat, long must be string, float, float respectively
+    :postcondition: correctly appends and return the html elements inside the file
     :return: a string, representing the html file name
     """
     # name of the html file
@@ -333,6 +342,8 @@ def get_distance_url(store: dict, current_position: tuple):
 
     :param store: a dictionary of stores
     :param current_position: a tuple, representing the current location
+    :precondition: store, current_position must be correctly formatted dict and tuple respectively
+    :postcondition: returns the correct url for the distance matrix api
     :return: a string, representing the url
     """
     key = get_api_key()
@@ -366,7 +377,11 @@ def make_score_file() -> str:
     """
     Return the file name to store the stores data.
 
+    :posstcondition: makes and returns the correct file name
     :return: a string
+
+    >>> make_score_file()
+    'stores.csv'
     """
     FILE_NAME = 'stores.csv'
     with open(FILE_NAME, 'w') as results:
