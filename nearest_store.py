@@ -68,9 +68,22 @@ def prompt_postal_code() -> str:
 
 def validate_postal_code(postal_code: str) -> bool:
     """
-    Validate a postal code string.
+    Validate a postal code string non-case sensitive.
 
     :return: True or False
+
+    >>> validate_postal_code('111 111')
+    False
+    >>> validate_postal_code('XXX XXX')
+    False
+    >>> validate_postal_code('1X1 X1X')
+    False
+    >>> validate_postal_code('A1A 1A1')
+    True
+    >>> validate_postal_code('a1a 1a1')
+    True
+    >>> validate_postal_code('A1A1A1')
+    True
     """
     # REGEX USED HERE
     pattern = re.compile(r'^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$')
