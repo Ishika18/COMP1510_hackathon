@@ -174,7 +174,6 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                     f"{store['vicinity'].replace(',', '')},{store['current_popularity']}", 'stores.csv')
             except KeyError:
                 pass
-
     return wrapper_score
 
 
@@ -242,14 +241,14 @@ def parse_data(file_name: str) -> dict:
     return store_attributes
 
 
-def generate_map(file_name, lat, lon) -> str:
+def generate_map(file_name: str, lat: float, lon: float) -> str:
     """
+    Return the html file name with appended html elements inside the file.
 
-
-    :param file_name:
-    :param lat:
-    :param lon:
-    :return:
+    :param file_name: a string representing the valid file name
+    :param lat: a float
+    :param lon: a float
+    :return: a string, representing the html file name
     """
     # name of the html file
     html_file_name = 'local_map.html'
@@ -339,6 +338,13 @@ def make_score_file() -> str:
 
 
 def print_stores(file_name: str):
+    """
+    Print the stores information in a user friendly manner.
+
+    :param file_name: a string, representing the file name containing stores information
+    :precondition: input parameter file_name must be a string representing valid file name
+    :postcondition: correctly prints the information of the stores
+    """
     store_data = parse_data(file_name)
     store_amount = len(store_data['store_name'])
     print("---------------------------------")
@@ -355,6 +361,9 @@ def print_stores(file_name: str):
 
 
 def run():
+    """
+    Run the functions.
+    """
     # USED TRY FINALLY HERE
     user_input = None
     file_name = make_score_file()
@@ -379,6 +388,9 @@ def run():
 
 
 def main():
+    """
+    Run the program.
+    """
     doctest.testmod()
     run()
 
