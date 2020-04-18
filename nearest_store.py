@@ -179,14 +179,14 @@ def get_score(store: dict) -> float:
     :postcondition: correctly returns the score value of the score
     :return: a float
     """
-    SECONDS = 60
+    SECONDS_IN_MINUTES = 60
     WAIT_TIME_WEIGHT = 50  # lower wait time is weighted higher
     POPULAR_WEIGHT = 50
     TRAVEL_WEIGHT = 10  # travel time is weighted lower because driving is better than waiting
 
     try:
         wait_time = store['time_spent'][0]
-        travel_time = store['time_value'] / SECONDS
+        travel_time = store['time_value'] / SECONDS_IN_MINUTES
         store_popularity = store['current_popularity']
         return TRAVEL_WEIGHT / travel_time + WAIT_TIME_WEIGHT / wait_time + POPULAR_WEIGHT / store_popularity
     except KeyError:
@@ -433,7 +433,9 @@ def run():
             if platform == 'win32':
                 webbrowser.open(html_file_name)
             else:
-                webbrowser.get('open -a /Applications/Google\ Chrome.app %s').open(html_file_name)
+                # PEP violation is required for the path to work for Mac system
+                path = r'open -a /Applications/Google\ Chrome.app %s'
+                webbrowser.get(path).open(html_file_name)
         except (ConnectionError, ValueError, IndexError) as error_message:
             print(error_message)
         finally:
