@@ -380,7 +380,7 @@ def run():
             if platform == 'win32':
                 webbrowser.open(html_file_name)
             else:
-                webbrowser.get('open -a /Applications/Google Chrome.app %s').open(html_file_name)
+                webbrowser.get('open -a /Applications/Google\ Chrome.app %s').open(html_file_name)
         except (ConnectionError, ValueError, IndexError) as error_message:
             print(error_message)
         finally:
