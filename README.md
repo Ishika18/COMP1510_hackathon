@@ -25,6 +25,7 @@ In terminal:
 `$ pip install folium`  
 `$ pip install pandas`  
 `$ pip install --upgrade git+https://github.com/m-wrzr/populartimes`  
+`$ pip install more-itertools`  
 
 ## Paired Programming 
 #### Ryan - Ronald
