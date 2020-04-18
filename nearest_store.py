@@ -186,6 +186,14 @@ def save_data(data_to_save: Any, file_name: str) -> None:
 
 @write_score
 def rank_stores(stores: list):
+    """
+    Return the list of top five stores.
+
+    :param stores: a list of dictionaries representing the stores
+    :precondition: stores must a list of dictionaries representing stores
+    :postcondition: correctly returns list of top five stores
+    :return: a list
+    """
     score_dict = {}
     for store in stores:
         score = get_score(store)
@@ -196,6 +204,9 @@ def rank_stores(stores: list):
 
 
 def get_api_key() -> str:
+    """
+    Return the api key.
+    """
     # Do not change this api key unless you have permission
     return 'AIzaSyAJrrx5fu_XACSiqjbvS0LeoF9qzl7NeOc'
 
@@ -237,7 +248,14 @@ def generate_map(stores, lat, lon) -> str:
     return html_file_name
 
 
-def get_distance_url(store: dict, current_position: tuple):
+def get_distance_url(store: dict, current_position: tuple) -> str:
+    """
+    Return the url for distance matrix api.
+
+    :param store: a dictionary
+    :param current_position: a tuple
+    :return: a string
+    """
     key = get_api_key()
     return f"https://maps.googleapis.com/maps/api/distancematrix/json?" \
            f"units=imperial&origins={current_position[0]},{current_position[1]}" \
