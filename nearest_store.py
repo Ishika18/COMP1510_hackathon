@@ -298,16 +298,16 @@ def generate_map(file_name: str, lat: float, lon: float) -> str:
     :return: a string, representing the html file name
     """
     # name of the html file
-    html_file_name = 'local_map.html'
-    icon_size = (50, 35)
-    initial_zoom_level = 12
-    marker_radius = 9
+    HTML_FILE_NAME = 'local_map.html'
+    ICON_SIZE = (50, 35)
+    INITIAL_ZOOM_LEVEL = 12
+    MARKER_RADIUS = 9
 
     # initialize map
-    local_map = folium.Map(location=[lat, lon], zoom_start=initial_zoom_level)
+    local_map = folium.Map(location=[lat, lon], zoom_start=INITIAL_ZOOM_LEVEL)
 
     # add marker for current location
-    folium.CircleMarker(location=(lat, lon), radius=marker_radius, tooltip='Current location',
+    folium.CircleMarker(location=(lat, lon), radius=MARKER_RADIUS, tooltip='Current location',
                         color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
 
     # parse data
@@ -328,15 +328,15 @@ def generate_map(file_name: str, lat: float, lon: float) -> str:
                                             store_attributes['wait_time'][i], store_attributes['store_address'][i],
                                             store_attributes['store_popularity'][i]),
                       tooltip='Click for more info.',
-                      icon=folium.features.CustomIcon(f'{i+1}.png', icon_size=icon_size)).add_to(local_map)
+                      icon=folium.features.CustomIcon(f'{i+1}.png', icon_size=ICON_SIZE)).add_to(local_map)
 
     # generate html file
-    local_map.save(html_file_name)
+    local_map.save(HTML_FILE_NAME)
 
-    return html_file_name
+    return HTML_FILE_NAME
 
 
-def get_distance_url(store: dict, current_position: tuple):
+def get_distance_url(store: dict, current_position: tuple) -> str:
     """
     Return the url for distance matrix api.
 
@@ -377,7 +377,7 @@ def make_score_file() -> str:
     """
     Return the file name to store the stores data.
 
-    :posstcondition: makes and returns the correct file name
+    :postcondition: makes and returns the correct file name
     :return: a string
 
     >>> make_score_file()
