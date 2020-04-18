@@ -360,6 +360,7 @@ def get_distance(stores: list, current_position: tuple):
     :param current_position: a tuple, representing the current position
     :precondition: stores must be a correctly formatted list of store dictionaries
     :postcondition: correctly adds the distance, travel_time and time_value to the store dictionaries in the given list
+    :raise ConnectionError: if the google server does not properly respond to the get request
     """
     # LIST SLICING
     for store in stores[:]:
