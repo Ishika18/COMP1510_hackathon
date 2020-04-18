@@ -14,7 +14,6 @@ import itertools
 def get_current_location() -> tuple:
     """
     Return the latitude and longitude of the user.
-
     :return: the latitude as a float and longitude as a float in a tuple
     """
     postal_code = prompt_postal_code()
@@ -35,7 +34,6 @@ def get_current_location() -> tuple:
 def get_coordinate_data(postal_code: str) -> dict:
     """
     Request coordinate data based on user's input postal code.
-
     :param postal_code: a string
     :return: response data as a dictionary
     """
@@ -55,7 +53,6 @@ def get_coordinate_data(postal_code: str) -> dict:
 def prompt_postal_code() -> str:
     """
     Prompt the user to enter a postal code.
-
     :return: a validated postal code as a string
     """
     postal_code = input('Enter a Canadian postal code in the format \'A1A 1A1\': ')
@@ -68,7 +65,6 @@ def prompt_postal_code() -> str:
 def validate_postal_code(postal_code: str) -> bool:
     """
     Validate a postal code string.
-
     :return: True or False
     """
     # REGEX USED HERE
@@ -97,7 +93,6 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> li
 def get_store_results(payload) -> list:
     """
     Request store results from Google Places API.
-
     :param payload: a dictionary of parameter required for the API request
     :return: data results as a dictionary
     """
@@ -134,7 +129,6 @@ def add_more_data_to_stores(stores: list):
 def get_score(store: dict) -> float:
     """
     Get the score of specified store using decision making algorithm.
-
     :param store: a dictionary
     :precondition: input parameter store must be a well formed dictionary representing the store
     :postcondition: correctly returns the score value of the score
@@ -158,7 +152,6 @@ def get_score(store: dict) -> float:
 def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, Any]):
     """
     Save the store data of the decorated function in a file.
-
     :param func: a function
     :return: a function
     """
@@ -173,14 +166,12 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                     f"{store['vicinity'].replace(',', '')},{store['current_popularity']}", 'stores.csv')
             except KeyError:
                 pass
-
     return wrapper_score
 
 
 def save_data(data_to_save: Any, file_name: str):
     """
     Append the specified input data to the specified file.
-
     :param data_to_save: an integer
     :param file_name: a string
     :precondition: file_name must be a string
@@ -191,14 +182,14 @@ def save_data(data_to_save: Any, file_name: str):
 
 
 @write_score
-def rank_stores(stores: list):
+def rank_stores(stores: list) -> list:
     """
-    Return the list of top five stores.
+    Return the list of the top stores (at most 5).
 
-    :param stores: a list of dictionaries representing the stores
-    :precondition: stores must a list of dictionaries representing stores
-    :postcondition: correctly returns list of top five stores
-    :return: a list
+    :param stores: a list of dictionaries representing stores
+    :precondition: input parameter stores must a correctly formatted stores
+    :postcondition: correctly returns the top stores (according to their scores)
+    :return: a list of stores
     """
     CUTOFF = 5
     score_dict = {}
@@ -215,13 +206,21 @@ def rank_stores(stores: list):
 
 def get_api_key() -> str:
     """
-    Return the api key.
+    Return the google api key.
+
+    :return: a string
     """
     # Do not change this api key unless you have permission
     return 'AIzaSyBw6AIHV6RIhH4b_Z-2iJI_LX5GGJIt7zI'
 
 
-def parse_data(file_name):
+def parse_data(file_name: str) -> dict:
+    """
+    Return the store attributes of the stores in the specified file name.
+
+    :param file_name: a string, representing the file name containing stores information
+    :return: a dictionary of store attributes
+    """
     data = pandas.read_csv(file_name)
     store_attribute_keys = ['store_name', 'store_latitude', 'store_longitude', 'travel_time', 'wait_time',
                             'store_address', 'store_popularity']
@@ -233,6 +232,14 @@ def parse_data(file_name):
 
 
 def generate_map(file_name, lat, lon) -> str:
+    """
+
+
+    :param file_name:
+    :param lat:
+    :param lon:
+    :return:
+    """
     # name of the html file
     html_file_name = 'local_map.html'
     icon_size = (50, 35)
@@ -271,13 +278,13 @@ def generate_map(file_name, lat, lon) -> str:
     return html_file_name
 
 
-def get_distance_url(store: dict, current_position: tuple) -> str:
+def get_distance_url(store: dict, current_position: tuple):
     """
     Return the url for distance matrix api.
 
-    :param store: a dictionary
-    :param current_position: a tuple
-    :return: a string
+    :param store: a dictionary of stores
+    :param current_position: a tuple, representing the current location
+    :return: a string, representing the url
     """
     key = get_api_key()
     return f"https://maps.googleapis.com/maps/api/distancematrix/json?" \
@@ -286,6 +293,14 @@ def get_distance_url(store: dict, current_position: tuple) -> str:
 
 
 def get_distance(stores: list, current_position: tuple):
+    """
+    Add distance, travel_time and time_value to the stores in the stores dictionary.
+
+    :param stores: a list of dictionaries representing the stores
+    :param current_position: a tuple, representing the current position
+    :precondition: stores must be a correctly formatted list of store dictionaries
+    :postcondition: correctly adds the distance, travel_time and time_value to the store dictionaries in the given list
+    """
     # LIST SLICING
     for store in stores[:]:
         url = get_distance_url(store, current_position)
@@ -298,7 +313,12 @@ def get_distance(stores: list, current_position: tuple):
         store['time_value'] = distance_json['rows'][0]['elements'][0]['duration']['value']
 
 
-def make_score_file():
+def make_score_file() -> str:
+    """
+    Return the file name to store the stores data.
+
+    :return: a string
+    """
     FILE_NAME = 'stores.csv'
     with open(FILE_NAME, 'w') as results:
         results.write("NAME,LAT,LON,TRAVEL,WAIT,ADDRESS,POPULARITY" + "\n")
