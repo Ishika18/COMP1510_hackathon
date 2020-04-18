@@ -36,7 +36,7 @@ Please also install the latest version of Google Chrome.
 Link is provided below.  
 https://support.google.com/chrome/answer/95346?co=GENIE.Platform%3DDesktop&hl=en&oco=0
 
-Make sure Google Chrome is under the Applications folder.
+FOR MAC USERS: Make sure Google Chrome is under the Applications folder.
 
 ## Special Notes
 Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. 
