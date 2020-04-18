@@ -18,6 +18,12 @@ Github ID: [rleung1004](https://github.com/rleung1004)
 Student ID: A00855225  
 Github ID: [TerryLun](https://github.com/TerryLun)  
 
+## Concept
+The Wuhan Virus is now an ongoing pandemic of coronavirus disease. As it spreads rapidly around the world, our daily lives are greatly affected. One of the many concerns is it is now less convenient to go to groceries and supermarkets due the line ups and wait times. We are going to build a program to help user pick a perfect store with low wait times within range.
+
+## Description
+This program will first get the user’s location. It then finds the closest grocery stores using the geolocation of the user. Next step is to find out travel times and popular times of each store using API and modules. Then the program determines which stores are not too populated while within user’s range. Finally, it will output the top five recommended places for the user to go.
+
 ## Installation Instructions
 In terminal:
 
