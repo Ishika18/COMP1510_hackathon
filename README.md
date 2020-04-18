@@ -52,8 +52,6 @@ commit implemented: get_current_location() and get_coordinate_data() - dd95545a4
 76 additions
 
 #### All team members
-commit implemented: we did a lot of work - 3a5fb1157650db58a19458df0def6b947a29f8e7
-
-34 additions, 22 deletions
+Most of this project was done together as paired programming
 
 
