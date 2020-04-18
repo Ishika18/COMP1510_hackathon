@@ -136,12 +136,15 @@ def get_score(store: dict) -> float:
     :return: a float
     """
     SECONDS = 60
-    WAIT_TIME_WEIGHT = 90  # lower wait time is weighted higher
+    WAIT_TIME_WEIGHT = 50  # lower wait time is weighted higher
+    POPULAR_WEIGHT = 50
     TRAVEL_WEIGHT = 10  # travel time is weighted lower because driving is better than waiting
+
     try:
         wait_time = store['time_spent'][0]
         travel_time = store['time_value'] / SECONDS
-        return TRAVEL_WEIGHT / travel_time + WAIT_TIME_WEIGHT / wait_time
+        store_popularity = store['current_popularity']
+        return TRAVEL_WEIGHT / travel_time + WAIT_TIME_WEIGHT / wait_time + POPULAR_WEIGHT / store_popularity
 
     except KeyError:
         return 0
@@ -161,11 +164,12 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                 save_data(
                     f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
                     f"{store['travel_time']},{store['time_spent'][0]} mins,"
-                    f"{store['vicinity'].replace(',', '')}", 'stores.csv')
+                    f"{store['vicinity'].replace(',', '')},{store['current_popularity']}", 'stores.csv')
             except KeyError:
                 save_data(
                     f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
-                    f"{store['travel_time']},No Data,{store['vicinity'].replace(',', '')}", 'stores.csv')
+                    f"{store['travel_time']},No Data,{store['vicinity'].replace(',', '')},"
+                    f"{store['current_popularity']}", 'stores.csv')
     return wrapper_score
 
 
@@ -196,7 +200,7 @@ def rank_stores(stores: list):
 
 def get_api_key() -> str:
     # Do not change this api key unless you have permission
-    return 'AIzaSyAJrrx5fu_XACSiqjbvS0LeoF9qzl7NeOc'
+    return 'AIzaSyBw6AIHV6RIhH4b_Z-2iJI_LX5GGJIt7zI'
 
 
 def generate_map(file_name, lat, lon) -> str:
@@ -219,15 +223,20 @@ def generate_map(file_name, lat, lon) -> str:
     store_longitude = list(data['LON'])
     wait_time = list(data['WAIT'])
     travel_time = list(data['TRAVEL'])
+    store_address = list(data['ADDRESS'])
+    store_popularity = list(data['POPULARITY'])
 
     # add each store as marker
-    for i, (name, lat, lon, travel, wait) in enumerate(zip(store_name, store_latitude, store_longitude, travel_time,
-                                                           wait_time), 1):
+    for i, (name, lat, lon, travel, wait, address, popularity) in \
+            enumerate(zip(store_name, store_latitude, store_longitude, travel_time, wait_time, store_address,
+                          store_popularity), 1):
         html_content = """<h1>%s</h1>
         <p>Estimated travel time: %s</p>
         <p>Current wait time: %s</p>
+        <p>Address: %s</p>
+        <p>Crowdedness: %s%%</p>
         """
-        folium.Marker([lat, lon], popup=html_content % (name, travel, wait), tooltip='Click for more info.',
+        folium.Marker([lat, lon], popup=html_content % (name, travel, wait, address, popularity), tooltip='Click for more info.',
                       icon=folium.features.CustomIcon(f'{i}.png', icon_size=icon_size)).add_to(local_map)
 
     # generate html file
@@ -259,7 +268,7 @@ def get_distance(stores: list, current_position: tuple):
 def make_score_file():
     FILE_NAME = 'stores.csv'
     with open(FILE_NAME, 'w') as results:
-        results.write("NAME,LAT,LON,TRAVEL,WAIT,ADDRESS" + "\n")
+        results.write("NAME,LAT,LON,TRAVEL,WAIT,ADDRESS,POPULARITY" + "\n")
 
     return FILE_NAME
 
