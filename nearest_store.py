@@ -297,13 +297,15 @@ def print_stores(file_name: str):
     store_data = parse_data(file_name)
     store_amount = len(store_data['store_name'])
     print("---------------------------------")
-    for i, store in enumerate(range(store_amount), 1):
-        print("%d. %s " % (i, store_data['store_name'][store]))
-        print("Travel Time: %s" % (store_data['travel_time'][store]))
-        print("Crowdedness: %s" % (store_data['store_popularity'][store]))
-        print("Wait Time: %s" % (store_data['wait_time'][store]))
-        print("---------------------------------")
-
+    if store_amount == 0:
+        print("There are no stores open near you.")
+    else:
+        for i, store in enumerate(range(store_amount), 1):
+            print("%d. %s " % (i, store_data['store_name'][store]))
+            print("Travel Time: %s" % (store_data['travel_time'][store]))
+            print("Crowdedness: %s" % (store_data['store_popularity'][store]))
+            print("Wait Time: %s" % (store_data['wait_time'][store]))
+            print("---------------------------------")
 
 
 def run():
