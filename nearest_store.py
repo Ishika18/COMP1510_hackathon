@@ -72,10 +72,8 @@ def validate_postal_code(postal_code: str) -> bool:
     """
     # REGEX USED HERE
     pattern = re.compile(r'^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$')
-    if pattern.search(postal_code):
-        return True
-    else:
-        return False
+
+    return True if pattern.search(postal_code) else False
 
 
 def find_closest_stores(current_latitude: float, current_longitude: float) -> list:
@@ -88,6 +86,7 @@ def find_closest_stores(current_latitude: float, current_longitude: float) -> li
     payload = {'location': f'{current_latitude},{current_longitude}',
                'rankby': 'distance',
                'type': 'grocery_or_supermarket',
+               'opennow': 'True',
                'key': get_api_key()}
     data = get_store_results(payload)
 
@@ -111,7 +110,13 @@ def get_store_results(payload) -> list:
 
 
 def add_more_data_to_stores(stores: list):
-    """ use set """
+    """
+    Add more information in the existing list of stores.
+
+    :param stores: a list of dictionaries representing stores from Google Places API
+    :precondition: stores should be a correctly formatted list of dictionaries
+    :postcondition: add new key value to stores in existing list
+    """
     key = get_api_key()
     # SET USED HERE
     desired_data = {'international_phone_number', 'current_popularity', 'time_spent'}
@@ -166,15 +171,12 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                     f"{store['travel_time']},{store['time_spent'][0]} mins,"
                     f"{store['vicinity'].replace(',', '')},{store['current_popularity']}", 'stores.csv')
             except KeyError:
-                save_data(
-                    f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
-                    f"{store['travel_time']},No Data,{store['vicinity'].replace(',', '')},"
-                    f"{store['current_popularity']}", 'stores.csv')
+                pass
 
     return wrapper_score
 
 
-def save_data(data_to_save: Any, file_name: str) -> None:
+def save_data(data_to_save: Any, file_name: str):
     """
     Append the specified input data to the specified file.
 
@@ -196,7 +198,10 @@ def rank_stores(stores: list):
         score_dict[score] = store
     top_scores = sorted(score_dict, reverse=True)
     # SYNTACTIC SUGAR AND RANGE AND ITERTOOLS
-    return [score_dict[top_scores[i]] for i in range(CUTOFF)]
+    try:
+        return [score_dict[top_scores[i]] for i in range(CUTOFF)]
+    except IndexError:
+        return [score_dict[top_scores[i]] for i in range(len(top_scores))]
 
 
 def get_api_key() -> str:
@@ -235,7 +240,8 @@ def generate_map(file_name, lat, lon) -> str:
     store_attributes = parse_data(file_name)
 
     # add each store as marker
-    for n, i in enumerate(range(5), 1):
+    store_amount = len(store_attributes['store_name'])
+    for n, i in enumerate(range(store_amount), 1):
         html_content = """<h1>%s</h1>
         <p>Estimated travel time: %s</p>
         <p>Current wait time: %s</p>
@@ -284,20 +290,25 @@ def make_score_file():
 
 
 def run():
-    while True:
+    user_input = None
+    file_name = make_score_file()
+    while user_input != 'q':
         try:
             current_latitude, current_longitude = get_current_location()
+            stores = find_closest_stores(current_latitude, current_longitude)
+            add_more_data_to_stores(stores)
+            get_distance(stores, (current_latitude, current_longitude))
+            rank_stores(stores)
+            html_file_name = generate_map(file_name, current_latitude, current_longitude)
+            webbrowser.open(html_file_name)
         except ValueError as error_message:
             print(error_message)
-        else:
-            break
-    file_name = make_score_file()
-    stores = find_closest_stores(current_latitude, current_longitude)
-    add_more_data_to_stores(stores)
-    get_distance(stores, (current_latitude, current_longitude))
-    top_five_stores = rank_stores(stores)
-    html_file_name = generate_map(file_name, current_latitude, current_longitude)
-    webbrowser.open(html_file_name)
+        except ConnectionError as error_message:
+            print(error_message)
+        except IndexError as error_message:
+            print(error_message)
+        finally:
+            user_input = input("Enter 'q' to quit, enter anything else to try again: ").strip().lower()
 
 
 def main():
