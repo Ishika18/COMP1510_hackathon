@@ -8,6 +8,7 @@ import webbrowser
 import folium
 import pandas
 import re
+import itertools
 
 
 def get_current_location() -> tuple:
@@ -126,7 +127,7 @@ def add_more_data_to_stores(stores: list):
             try:
                 store[datum] = response[datum]
             except KeyError:
-                # Key error will occur if place does not have data available.
+                # Key error will occur if place does not have data available. We will skip the data.
                 continue
 
 
@@ -205,7 +206,7 @@ def rank_stores(stores: list):
         score = get_score(store)
         score_dict[score] = store
     top_scores = sorted(score_dict, reverse=True)
-    # SYNTACTIC SUGAR AND RANGE AND ITERTOOLS
+    # LIST COMPREHENSION AND RANGE AND ITERTOOLS
     try:
         return [score_dict[top_scores[i]] for i in range(CUTOFF)]
     except IndexError:
@@ -222,15 +223,12 @@ def get_api_key() -> str:
 
 def parse_data(file_name):
     data = pandas.read_csv(file_name)
-    store_attributes = {
-        'store_name': list(data['NAME']),
-        'store_latitude': list(data['LAT']),
-        'store_longitude': list(data['LON']),
-        'wait_time': list(data['WAIT']),
-        'travel_time': list(data['TRAVEL']),
-        'store_address': list(data['ADDRESS']),
-        'store_popularity': list(data['POPULARITY'])
-    }
+    store_attribute_keys = ['store_name', 'store_latitude', 'store_longitude', 'travel_time', 'wait_time',
+                            'store_address', 'store_popularity']
+    store_attribute_values = [list(data['NAME']), list(data['LAT']), list(data['LON']), list(data['TRAVEL']),
+                              list(data['WAIT']), list(data['ADDRESS']), list(data['POPULARITY'])]
+    # DICTIONARY COMPREHENSION
+    store_attributes = {key: value for key, value in zip(store_attribute_keys, store_attribute_values)}
     return store_attributes
 
 
@@ -239,12 +237,13 @@ def generate_map(file_name, lat, lon) -> str:
     html_file_name = 'local_map.html'
     icon_size = (50, 35)
     initial_zoom_level = 12
+    marker_radius = 9
 
     # initialize map
     local_map = folium.Map(location=[lat, lon], zoom_start=initial_zoom_level)
 
     # add marker for current location
-    folium.CircleMarker(location=(lat, lon), radius=9, tooltip='Current location',
+    folium.CircleMarker(location=(lat, lon), radius=marker_radius, tooltip='Current location',
                         color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
 
     # parse data
@@ -252,7 +251,7 @@ def generate_map(file_name, lat, lon) -> str:
 
     # add each store as marker
     store_amount = len(store_attributes['store_name'])
-    for n, i in enumerate(range(store_amount), 1):
+    for i in itertools.islice(itertools.count(), store_amount):
         html_content = """<h1>%s</h1>
         <p>Estimated travel time: %s</p>
         <p>Current wait time: %s</p>
@@ -264,7 +263,7 @@ def generate_map(file_name, lat, lon) -> str:
                                             store_attributes['wait_time'][i], store_attributes['store_address'][i],
                                             store_attributes['store_popularity'][i]),
                       tooltip='Click for more info.',
-                      icon=folium.features.CustomIcon(f'{n}.png', icon_size=icon_size)).add_to(local_map)
+                      icon=folium.features.CustomIcon(f'{i+1}.png', icon_size=icon_size)).add_to(local_map)
 
     # generate html file
     local_map.save(html_file_name)
@@ -307,6 +306,21 @@ def make_score_file():
     return FILE_NAME
 
 
+def print_stores(file_name: str):
+    store_data = parse_data(file_name)
+    store_amount = len(store_data['store_name'])
+    print("---------------------------------")
+    if store_amount == 0:
+        print("There are no stores open near you.")
+    else:
+        for i, store in enumerate(range(store_amount), 1):
+            print("%d. %s " % (i, store_data['store_name'][store]))
+            print("Travel Time: %s" % (store_data['travel_time'][store]))
+            print("Crowdedness: %s" % (store_data['store_popularity'][store]))
+            print("Wait Time: %s" % (store_data['wait_time'][store]))
+            print("---------------------------------")
+
+
 def run():
     user_input = None
     file_name = make_score_file()
@@ -317,6 +331,7 @@ def run():
             add_more_data_to_stores(stores)
             get_distance(stores, (current_latitude, current_longitude))
             rank_stores(stores)
+            print_stores(file_name)
             html_file_name = generate_map(file_name, current_latitude, current_longitude)
             webbrowser.open(html_file_name)
         except ValueError as error_message:
