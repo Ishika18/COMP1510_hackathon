@@ -127,7 +127,7 @@ def add_more_data_to_stores(stores: list):
             try:
                 store[datum] = response[datum]
             except KeyError:
-                # Key error will occur if place does not have data available.
+                # Key error will occur if place does not have data available. We will skip the data.
                 continue
 
 
@@ -198,7 +198,7 @@ def rank_stores(stores: list):
         score = get_score(store)
         score_dict[score] = store
     top_scores = sorted(score_dict, reverse=True)
-    # SYNTACTIC SUGAR AND RANGE AND ITERTOOLS
+    # LIST COMPREHENSION AND RANGE AND ITERTOOLS
     try:
         return [score_dict[top_scores[i]] for i in range(CUTOFF)]
     except IndexError:
@@ -212,15 +212,12 @@ def get_api_key() -> str:
 
 def parse_data(file_name):
     data = pandas.read_csv(file_name)
-    store_attributes = {
-        'store_name': list(data['NAME']),
-        'store_latitude': list(data['LAT']),
-        'store_longitude': list(data['LON']),
-        'wait_time': list(data['WAIT']),
-        'travel_time': list(data['TRAVEL']),
-        'store_address': list(data['ADDRESS']),
-        'store_popularity': list(data['POPULARITY'])
-    }
+    store_attribute_keys = ['store_name', 'store_latitude', 'store_longitude', 'wait_time', 'travel_time',
+                            'store_address', 'store_popularity']
+    store_attribute_values = [list(data['NAME']), list(data['LAT']),
+                              list(data['WAIT']), list(data['ADDRESS']), list(data['POPULARITY'])]
+    # DICTIONARY COMPREHENSION
+    store_attributes = {key: value for key, value in zip(store_attribute_keys, store_attribute_values)}
     return store_attributes
 
 
