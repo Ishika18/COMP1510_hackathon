@@ -4,7 +4,6 @@ import populartimes
 import doctest
 import requests
 import json
-import more_itertools
 import webbrowser
 import folium
 import pandas
@@ -157,6 +156,7 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
     :param func: a function
     :return: a function
     """
+
     def wrapper_score(*args, **kwargs):
         top_stores = func(*args, **kwargs)
         for store in top_stores:
@@ -170,6 +170,7 @@ def write_score(func: Callable[[Any, Any], Any]) -> (Tuple[Any, ...], Dict[str, 
                     f"{store['name']},{store['geometry']['location']['lat']},{store['geometry']['location']['lng']},"
                     f"{store['travel_time']},No Data,{store['vicinity'].replace(',', '')},"
                     f"{store['current_popularity']}", 'stores.csv')
+
     return wrapper_score
 
 
@@ -214,6 +215,20 @@ def get_api_key() -> str:
     return 'AIzaSyBw6AIHV6RIhH4b_Z-2iJI_LX5GGJIt7zI'
 
 
+def parse_data(file_name):
+    data = pandas.read_csv(file_name)
+    store_attributes = {
+        'store_name': list(data['NAME']),
+        'store_latitude': list(data['LAT']),
+        'store_longitude': list(data['LON']),
+        'wait_time': list(data['WAIT']),
+        'travel_time': list(data['TRAVEL']),
+        'store_address': list(data['ADDRESS']),
+        'store_popularity': list(data['POPULARITY'])
+    }
+    return store_attributes
+
+
 def generate_map(file_name, lat, lon) -> str:
     # name of the html file
     html_file_name = 'local_map.html'
@@ -228,27 +243,22 @@ def generate_map(file_name, lat, lon) -> str:
                         color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
 
     # parse data
-    data = pandas.read_csv(file_name)
-    store_name = list(data['NAME'])
-    store_latitude = list(data['LAT'])
-    store_longitude = list(data['LON'])
-    wait_time = list(data['WAIT'])
-    travel_time = list(data['TRAVEL'])
-    store_address = list(data['ADDRESS'])
-    store_popularity = list(data['POPULARITY'])
+    store_attributes = parse_data(file_name)
 
     # add each store as marker
-    for i, (name, lat, lon, travel, wait, address, popularity) in \
-            enumerate(zip(store_name, store_latitude, store_longitude, travel_time, wait_time, store_address,
-                          store_popularity), 1):
+    for n, i in enumerate(range(5), 1):
         html_content = """<h1>%s</h1>
         <p>Estimated travel time: %s</p>
         <p>Current wait time: %s</p>
         <p>Address: %s</p>
         <p>Crowdedness: %s%%</p>
         """
-        folium.Marker([lat, lon], popup=html_content % (name, travel, wait, address, popularity), tooltip='Click for more info.',
-                      icon=folium.features.CustomIcon(f'{i}.png', icon_size=icon_size)).add_to(local_map)
+        folium.Marker([store_attributes['store_latitude'][i], store_attributes['store_longitude'][i]],
+                      popup=html_content % (store_attributes['store_name'][i], store_attributes['travel_time'][i],
+                                            store_attributes['wait_time'][i], store_attributes['store_address'][i],
+                                            store_attributes['store_popularity'][i]),
+                      tooltip='Click for more info.',
+                      icon=folium.features.CustomIcon(f'{n}.png', icon_size=icon_size)).add_to(local_map)
 
     # generate html file
     local_map.save(html_file_name)
