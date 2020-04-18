@@ -8,6 +8,7 @@ import webbrowser
 import folium
 import pandas
 import re
+import itertools
 
 
 def get_current_location() -> tuple:
@@ -228,12 +229,13 @@ def generate_map(file_name, lat, lon) -> str:
     html_file_name = 'local_map.html'
     icon_size = (50, 35)
     initial_zoom_level = 12
+    marker_radius = 9
 
     # initialize map
     local_map = folium.Map(location=[lat, lon], zoom_start=initial_zoom_level)
 
     # add marker for current location
-    folium.CircleMarker(location=(lat, lon), radius=9, tooltip='Current location',
+    folium.CircleMarker(location=(lat, lon), radius=marker_radius, tooltip='Current location',
                         color='white', fill_color='#4286F5', fill_opacity=1).add_to(local_map)
 
     # parse data
@@ -241,7 +243,7 @@ def generate_map(file_name, lat, lon) -> str:
 
     # add each store as marker
     store_amount = len(store_attributes['store_name'])
-    for n, i in enumerate(range(store_amount), 1):
+    for i in itertools.islice(itertools.count(), store_amount):
         html_content = """<h1>%s</h1>
         <p>Estimated travel time: %s</p>
         <p>Current wait time: %s</p>
@@ -253,7 +255,7 @@ def generate_map(file_name, lat, lon) -> str:
                                             store_attributes['wait_time'][i], store_attributes['store_address'][i],
                                             store_attributes['store_popularity'][i]),
                       tooltip='Click for more info.',
-                      icon=folium.features.CustomIcon(f'{n}.png', icon_size=icon_size)).add_to(local_map)
+                      icon=folium.features.CustomIcon(f'{i+1}.png', icon_size=icon_size)).add_to(local_map)
 
     # generate html file
     local_map.save(html_file_name)
